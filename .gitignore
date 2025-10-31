@@ -43,3 +43,14 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+Flutter build and intermediate outputs
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+
+Platform-specific auto-generated plugin registrants
+/flutter/generated_plugin_registrant.*
+/flutter/generated_plugins.cmake
