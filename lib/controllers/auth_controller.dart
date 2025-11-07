@@ -8,7 +8,7 @@ class AuthController extends ChangeNotifier {
 
   // 📱 Controllers
   final usernameCtrl = TextEditingController();
-  final phoneCtrl = TextEditingController(text: '05');
+  final phoneCtrl = TextEditingController();
   final passCtrl = TextEditingController();
   final confirmCtrl = TextEditingController();
   final otpControllers = List.generate(6, (_) => TextEditingController());
@@ -18,6 +18,9 @@ class AuthController extends ChangeNotifier {
   bool otpStep = false;
   bool accountStep = false;
 
+  // 🌍 كود الدولة (افتراضي: +972)
+  String countryCode = "+972";
+
   // ⚠️ رسائل الخطأ
   String? usernameError;
   String? phoneError;
@@ -25,7 +28,7 @@ class AuthController extends ChangeNotifier {
   String? confirmError;
   String? otpError;
 
-  // 🧹 تهيئة للمراقبة التفاعلية (حتى تختفي الأخطاء عند الكتابة)
+  // 🧹 مراقبة الحقول لتصفية الأخطاء
   AuthController() {
     usernameCtrl.addListener(_clearUsernameError);
     phoneCtrl.addListener(_clearPhoneError);
@@ -36,12 +39,15 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  @override
   void dispose() {
     usernameCtrl.dispose();
     phoneCtrl.dispose();
     passCtrl.dispose();
     confirmCtrl.dispose();
-    for (var c in otpControllers) c.dispose();
+    for (var c in otpControllers) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -54,7 +60,9 @@ class AuthController extends ChangeNotifier {
   }
 
   void _clearPhoneError() {
-    if (phoneError != null && phoneCtrl.text.startsWith("05") && phoneCtrl.text.length == 10) {
+    if (phoneError != null &&
+        phoneCtrl.text.startsWith("5") &&
+        phoneCtrl.text.length == 9) {
       phoneError = null;
       notifyListeners();
     }
@@ -83,18 +91,34 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  // 🌍 تبديل كود الدولة
+  void toggleCountryCode() {
+    countryCode = (countryCode == "+972") ? "+970" : "+972";
+    notifyListeners();
+  }
+
+  // 🔙 الرجوع للخطوة السابقة
+  void goBack() {
+    if (accountStep) {
+      accountStep = false;
+    } else if (otpStep) {
+      otpStep = false;
+    }
+    notifyListeners();
+  }
+
   // ✅ تحقق من رقم الهاتف
   bool validatePhone() {
     final phone = phoneCtrl.text.trim();
 
-    if (!phone.startsWith('05')) {
-      phoneError = "يجب أن يبدأ رقم الجوال بـ 05";
+    if (!phone.startsWith('5')) {
+      phoneError = "يجب أن يبدأ رقم الجوال بالرقم 5";
       notifyListeners();
       return false;
     }
 
-    if (!RegExp(r'^05\d{8}$').hasMatch(phone)) {
-      phoneError = "رقم الجوال يجب أن يتكون من 10 أرقام";
+    if (!RegExp(r'^5\d{8}$').hasMatch(phone)) {
+      phoneError = "رقم الجوال يجب أن يتكون من 9 أرقام ويبدأ بـ 5";
       notifyListeners();
       return false;
     }
@@ -104,7 +128,7 @@ class AuthController extends ChangeNotifier {
     return true;
   }
 
-  // ✅ تحقق من الحقول الأساسية
+  // ✅ تحقق من بيانات الحساب
   bool validateAccount() {
     usernameError = null;
     passError = null;
@@ -132,24 +156,31 @@ class AuthController extends ChangeNotifier {
         confirmError == null;
   }
 
-  // 📩 إرسال OTP
+  // 📩 إرسال OTP عبر Firebase
   Future<void> sendOTP(BuildContext context) async {
     if (!validatePhone()) return;
 
-    final phone = "+972${phoneCtrl.text.substring(1)}";
+    // 🔧 معالجة المقدمة لتناسب Firebase (تحويل +970 إلى +972)
+    String firebaseCode = (countryCode == "+970") ? "+972" : countryCode;
+
+    // 🔢 الرقم الكامل بصيغة E.164 (بدون صفر أول)
+    final local = phoneCtrl.text.trim();
+    final fullPhone = "$firebaseCode$local";
+
+    debugPrint("📤 إرسال OTP إلى: $fullPhone");
 
     if (kIsWeb) {
       verificationId = "web-test";
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Web test OTP: 123456")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Web test OTP: 123456")));
       otpStep = true;
       notifyListeners();
       return;
     }
 
     await _auth.verifyPhoneNumber(
-      phoneNumber: phone,
+      phoneNumber: fullPhone,
       verificationCompleted: (credential) async {
         await _auth.signInWithCredential(credential);
       },
@@ -202,9 +233,10 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  // 🧠 تسجيل الدخول تجريبي
+  // 🧠 تسجيل دخول تجريبي
   bool login(String username, String password) {
-    if ((username == "takkeh" || username == "0590000000") && password == "12345") {
+    if ((username == "takkeh" || username == "599000000") &&
+        password == "12345") {
       debugPrint("✅ تسجيل دخول ناجح");
       return true;
     }

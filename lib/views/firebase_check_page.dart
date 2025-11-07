@@ -36,7 +36,7 @@ class FirebaseCheckPage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                  MaterialPageRoute(builder: (context) => const SignUpView()),
                 );
               },
               child: const Text('Open Sign Up Page'),
