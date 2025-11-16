@@ -40,12 +40,15 @@ android {
 
     signingConfigs {
         release {
-            if(System.getenv("ANDROID_KEYSTORE_PATH")) {
-            storeFile file(System.getenv("ANDROID_KEYSTORE_PATH"))
-            storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
-            keyAlias System.getenv("ANDROID_KEYSTORE_ALIAS")
-            keyPassword System.getenv("ANDROID_KEY_PASSWORD")
-        }
+            def keystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+if (keystorePath != null && keystorePath.trim()) {
+    storeFile file(keystorePath)
+    storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+    keyAlias System.getenv("ANDROID_KEYSTORE_ALIAS")
+    keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+} else {
+    println("❌ ANDROID_KEYSTORE_PATH is missing or empty")
+}
         }
     }
     
