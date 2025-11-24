@@ -9,7 +9,6 @@ import './config/app_config.dart';
 import './config/app_theme.dart';
 import './services/firebase_service.dart';
 import './services/supabase_service.dart';
-import './views/splash_view.dart';
 import './views/login_view.dart';
 import './views/signup_view.dart';
 
@@ -42,10 +41,9 @@ class MyApp extends StatelessWidget {
 }
 
 class TakkehApp extends StatelessWidget {
-  
   const TakkehApp({super.key});
 
-@override
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
