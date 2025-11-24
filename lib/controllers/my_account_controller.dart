@@ -15,13 +15,10 @@ class MyAccountController {
   /// If you have neither, we can store auth id in a column 'auth_id' and use that.
 
   Future<UserModel?> getUserByPhone(String phone) async {
-    final res = await _client
-        .from('users')
-        .select()
-        .eq('phone', phone)
-        .maybeSingle();
+    final res =
+        await _client.from('users').select().eq('phone', phone).maybeSingle();
     if (res == null) return null;
-    return UserModel.fromMap(res as Map<String, dynamic>);
+    return UserModel.fromMap(res);
   }
 
   /// Try to load current user using Supabase auth metadata (phone) fallback.
@@ -43,12 +40,9 @@ class MyAccountController {
     // As a last resort, try to find a row that matches the user's email (if exists)
     final email = user.email;
     if (email != null && email.isNotEmpty) {
-      final res = await _client
-          .from('users')
-          .select()
-          .eq('email', email)
-          .maybeSingle();
-      if (res != null) return UserModel.fromMap(res as Map<String, dynamic>);
+      final res =
+          await _client.from('users').select().eq('email', email).maybeSingle();
+      if (res != null) return UserModel.fromMap(res);
     }
 
     return null;
@@ -63,8 +57,7 @@ class MyAccountController {
   }
 
   Future<bool> deleteUserByPhone(String phone) async {
-    final res =
-        await _client.from('users').delete().eq('phone', phone);
+    final res = await _client.from('users').delete().eq('phone', phone);
     return res.error == null;
   }
 

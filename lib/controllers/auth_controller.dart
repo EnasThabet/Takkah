@@ -12,8 +12,7 @@ class AuthController extends ChangeNotifier {
   final passCtrl = TextEditingController();
   final confirmCtrl = TextEditingController();
   final otpControllers = List.generate(6, (_) => TextEditingController());
-    final supabase = Supabase.instance.client;
-
+  final supabase = Supabase.instance.client;
 
   // ===================== States =====================
   bool otpStep = false;
@@ -191,7 +190,8 @@ class AuthController extends ChangeNotifier {
       _showMessage(context, "تعذر الاتصال بالسيرفر: $e");
     }
   }
-   bool loading = false;
+
+  bool loading = false;
 
   /// load the current logged-in user's profile from 'users' table
   Future<void> loadUserProfile() async {
@@ -202,14 +202,11 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final res = await supabase
-          .from('users')
-          .select()
-          .eq('id', user.id)
-          .maybeSingle();
+      final res =
+          await supabase.from('users').select().eq('id', user.id).maybeSingle();
 
       if (res != null) {
-        final Map<String, dynamic> row = res as Map<String, dynamic>;
+        final Map<String, dynamic> row = res;
         usernameCtrl.text = row['username'] ?? '';
         phoneCtrl.text = row['phone_number'] ?? '';
         passCtrl.text = row['password_hash'] ?? '';
@@ -282,7 +279,6 @@ class AuthController extends ChangeNotifier {
     phoneCtrl.dispose();
     passCtrl.dispose();
   }
-
 
   // ===================== Login User =====================
   Future<void> loginUser(BuildContext context) async {
